@@ -1,4 +1,4 @@
-# Slack interactive message in Golang
+# [![Go Report Card](https://goreportcard.com/badge/github.com/Brettm12345/go-slack-pokerbot)](https://goreportcard.com/report/github.com/Brettm12345/go-slack-pokerbot)Slack interactive message in Golang
 
 This is a slack bot to dealing and managing Texas Hold Em' games. It uses slack interactive messages with the slack api to make it easy for the player to respond to the bot
 
