@@ -63,23 +63,19 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 	attachment := slack.Attachment{
 		Text:       "",
 		Color:      "#101010",
-		CallbackID: "Bett ",
+		CallbackID: "Start",
 		Actions: []slack.AttachmentAction{
 			{
 				Name: actionSelect,
 				Type: "select",
 				Options: []slack.AttachmentActionOption{
 					{
-						Text:  "call",
-						Value: "call",
+						Text:  "Play a game with the AI",
+						Value: "Play a game with the AI",
 					},
 					{
-						Text:  "raise",
-						Value: "raise",
-					},
-					{
-						Text: "fold",
-						Value: "fold",
+						Text:  "Play a game with other players",
+						Value: "Play a game with other players",
 					},
 				},
 			},
