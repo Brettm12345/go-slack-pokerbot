@@ -15,14 +15,14 @@ const (
 	actionCancel = "cancel"
 )
 
+// LstenAndResponse listens slack events and response
+// particular messages. It replies by slack message button.
 type SlackListener struct {
 	client    *slack.Client
 	botID     string
 	channelID string
 }
 
-// LstenAndResponse listens slack events and response
-// particular messages. It replies by slack message button.
 func (s *SlackListener) ListenAndResponse() {
 	rtm := s.client.NewRTM()
 
