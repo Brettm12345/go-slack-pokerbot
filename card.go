@@ -1,9 +1,7 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-)
+import s "strings"
+
 
 // Card represents a playing card in a deck.
 type Card struct {
@@ -12,11 +10,11 @@ type Card struct {
 	image string
 }
 
-func (c Card, ascii bool) String() string {
-	suite = strings.Title(c.suite)
-	if ascii {
-		return c.rank + suite
-	}
+func (c Card) String() string {
 	suiteEmoji := map[string]string{"Spades": "♠", "Hearts": "♥", "Diamonds": "♦", "Clubs": "♣"}
-	return c.rank + suiteEmoji[suite]
+	return c.rank + suiteEmoji[s.Title(c.suite)]
+}
+
+func (c Card) ascii() string {
+	return c.rank + s.Title(c.suite)
 }
