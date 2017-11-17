@@ -2,7 +2,6 @@ package main
 
 import s "strings"
 
-
 // Card represents a playing card in a deck.
 type Card struct {
 	suite string
