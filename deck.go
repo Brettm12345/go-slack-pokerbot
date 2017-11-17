@@ -2,20 +2,45 @@ package main
 
 import "math/rand"
 
-suites := [4]string{"spades", "hearts", "diamonds", "clubs"}
-ranks := [13]string{"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "A"}
-deck := make([]Card, 52)
 
-for suiteNum, suite := range suites {
-	for rankNum, rank := range ranks {
-		deck[suiteNum + rankNum] = Card(suite, rank)
+// Deck is a slice of every playing card in the virtual deck
+type Deck struct {
+	cards  []Card
+	suites [4]string
+	ranks  [13]string
+}
+
+
+func init() {
+	deck := new(Deck)
+	deck.suites[0] = "spades"
+	deck.suites[1] = "hearts"
+	deck.suites[2] = "diamonds"
+	deck.suites[3] = "clubs"
+	deck.ranks[0] = "2"
+	deck.ranks[1] = "3"
+	deck.ranks[2] = "4"
+	deck.ranks[3] = "5"
+	deck.ranks[4] = "6"
+	deck.ranks[5] = "7"
+	deck.ranks[6] = "8"
+	deck.ranks[7] = "9"
+	deck.ranks[8] = "10"
+	deck.ranks[9] = "J"
+	deck.ranks[10] = "Q"
+	deck.ranks[11] = "K"
+	deck.ranks[12] = "A"
+	for suiteNum, suite := range deck.suites {
+		for rankNum, rank := range deck.ranks {
+			deck.cards.append(Card(suite, rank))
+		}
 	}
 }
 
-func draw(num int) {
+func draw(d Deck, num int) []Card {
 	cards := make([]Card, num)
-	for (int i := 0; i < num; i++) {
-		cardIndex = rand.Intn(:len(deck))
+	for i := 0; i < num; i++ {
+		cardIndex = rand.Intn(len(deck))
 		cards.append(deck[cardIndex])
 		deck[cardIndex] = deck[len(deck)-1]
 		deck = deck[:len(deck)-1]
@@ -23,13 +48,12 @@ func draw(num int) {
 	return cards
 }
 
-func shuffle(cards ...Card) {
+func shuffle(d Deck, cards ...Card) Deck {
 	for _, card := range cards {
-		deck.append(card)
+		d.cards.append(card)
 	}
-	list := rand.Perm(len(deck))
-	for i := range deck {
+	for i := range d.cards {
 		j := rand.Intn(i + 1)
-		deck[i], deck[j] = deck[j], deck[i]
+		d.cards[i], d.cards[j] = d.cards[j], d.cards[i]
 	}
 }
