@@ -1,4 +1,4 @@
-package main
+package pokerbot
 
 import (
 	"fmt"
@@ -56,7 +56,7 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 
 	// Parse message
 	m := strings.Split(strings.TrimSpace(ev.Msg.Text), " ")[1:]
-	if len(m) == 0 || m[0] != "hey" {
+	if len(m) == 0 {
 		return fmt.Errorf("invalid message")
 	}
 
@@ -67,20 +67,15 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 		CallbackID: "Start",
 		Actions: []slack.AttachmentAction{
 			{
-				Name: actionSelect,
-				Type: "select",
-				Options: []slack.AttachmentActionOption{
-					{
-						Text:  "Play a game with the AI",
-						Value: "Play a game with the AI",
-					},
-					{
-						Text:  "Play a game with other players",
-						Value: "Play a game with other players",
-					},
-				},
+				Name: actionStart,
+				Text: "Play a game with the AI",
+				Type: "button",
 			},
-
+			{
+				Name: actionStart,
+				Text: "Play a game with other players",
+				Type: "button",
+			},
 			{
 				Name:  actionCancel,
 				Text:  "Cancel",

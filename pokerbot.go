@@ -1,4 +1,4 @@
-package main
+package pokerbot
 
 import (
 	"log"
