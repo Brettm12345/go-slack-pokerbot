@@ -29,7 +29,7 @@ type envConfig struct {
 	ChannelID string `envconfig:"CHANNEL_ID" required:"true"`
 }
 
-func main() {
+func pokerbot() {
 	os.Exit(_main(os.Args[1:]))
 }
 
