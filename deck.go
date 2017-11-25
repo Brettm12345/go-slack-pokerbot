@@ -7,6 +7,7 @@ type Deck struct {
 	cards []Card
 }
 
+// Shuffle shuffles the deck and takes cards as an argument to shuffle into the deck
 func (d *Deck) Shuffle(cards ...Card) {
 	d.cards = append(d.cards, cards...)
 	for i := range d.cards {
@@ -15,6 +16,7 @@ func (d *Deck) Shuffle(cards ...Card) {
 	}
 }
 
+// Draw returns an arbitrary number of cards and removes them from the deck
 func (d *Deck) Draw(num int) []Card {
 	d.Shuffle()
 	cards := d.cards[len(d.cards)-num:]
@@ -22,6 +24,7 @@ func (d *Deck) Draw(num int) []Card {
 	return cards
 }
 
+// NewDeck creates a new deck
 func NewDeck() *Deck {
 	deck := new(Deck)
 	suites := [4]string{"spades", "hearts", "diamonds", "clubs"}
