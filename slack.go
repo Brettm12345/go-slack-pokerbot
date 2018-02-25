@@ -1,4 +1,4 @@
-package pokerbot
+package main
 
 import (
 	"fmt"
@@ -10,9 +10,11 @@ import (
 
 const (
 	// action is used for slack attament action.
-	actionSelect = "select"
-	actionStart  = "start"
-	actionCancel = "cancel"
+	actionCancel       = "cancel"
+	actionNewGame      = "new game"
+	actionAddPlayer    = "add player"
+	actionRemovePlayer = "remove player"
+	actionPlayerReady  = "player ready"
 )
 
 // SlackListener defines the slack id for the listener bot.
@@ -50,7 +52,7 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 	}
 
 	// Only response mention to bot. Ignore else.
-	if !strings.HasPrefix(ev.Msg.Text, fmt.Sprintf("<@%s> ", s.botID)) {
+	if !strings.HasPrefix(ev.Msg.Text, fmt.Sprintf("<@%s>", s.botID)) {
 		return nil
 	}
 
@@ -62,18 +64,13 @@ func (s *SlackListener) handleMessageEvent(ev *slack.MessageEvent) error {
 
 	// value is passed to message handler when request is approved.
 	attachment := slack.Attachment{
-		Text:       "",
+		Text:       "Start Poker Game",
 		Color:      "#101010",
 		CallbackID: "Start",
 		Actions: []slack.AttachmentAction{
 			{
-				Name: actionStart,
-				Text: "Play a game with the AI",
-				Type: "button",
-			},
-			{
-				Name: actionStart,
-				Text: "Play a game with other players",
+				Name: actionNewGame,
+				Text: "Yes",
 				Type: "button",
 			},
 			{

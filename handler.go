@@ -1,4 +1,4 @@
-package pokerbot
+package main
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/nlopes/slack"
 )
@@ -17,6 +16,9 @@ type interactionHandler struct {
 	slackClient       *slack.Client
 	verificationToken string
 }
+
+var players []slack.User
+var ready []slack.User
 
 func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -55,25 +57,21 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	action := message.Actions[0]
 	switch action.Name {
-	case actionSelect:
-		value := action.SelectedOptions[0].Value
-
-		// Overwrite original drop down message.
+	case actionNewGame:
+		if containsPlayer(ready, message.User) {
+			ready = removePlayer(ready, message.User)
+		}
+		if containsPlayer(players, message.User) {
+			players = removePlayer(players, message.User)
+		}
 		originalMessage := message.OriginalMessage
-		originalMessage.Attachments[0].Text = fmt.Sprintf("OK to order %s ?", strings.Title(value))
+		originalMessage.Attachments[0].Text = fmt.Sprintf(listPlayers(players, ready))
 		originalMessage.Attachments[0].Actions = []slack.AttachmentAction{
 			{
-				Name:  actionStart,
-				Text:  "Yes",
+				Name:  actionAddPlayer,
+				Text:  "Join game",
 				Type:  "button",
 				Value: "start",
-				Style: "primary",
-			},
-			{
-				Name:  actionCancel,
-				Text:  "No",
-				Type:  "button",
-				Style: "danger",
 			},
 		}
 
@@ -81,14 +79,66 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(&originalMessage)
 		return
-	case actionStart:
-		title := ":ok: your order was submitted! yay!"
-		responseMessage(w, message.OriginalMessage, title, "")
+
+	case actionAddPlayer:
+		if containsPlayer(ready, message.User) {
+			ready = removePlayer(ready, message.User)
+		}
+		if !containsPlayer(players, message.User) {
+			players = append(players, message.User)
+		}
+		originalMessage := message.OriginalMessage
+
+		originalMessage.Attachments[0].Text = fmt.Sprintf(listPlayers(players, ready))
+		originalMessage.Attachments[0].Actions = []slack.AttachmentAction{
+			{
+				Name:  actionPlayerReady,
+				Text:  "Ready",
+				Type:  "button",
+				Value: "ready",
+				Style: "primary",
+			},
+			{
+				Name:  actionNewGame,
+				Text:  "Leave game",
+				Type:  "button",
+				Value: "start",
+				Style: "danger",
+			},
+		}
+		w.Header().Add("Content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(&originalMessage)
 		return
-	case actionCancel:
-		title := fmt.Sprintf(":x: @%s canceled the request", message.User.Name)
-		responseMessage(w, message.OriginalMessage, title, "")
+
+	case actionPlayerReady:
+		if !containsPlayer(ready, message.User) {
+			ready = append(ready, message.User)
+		}
+		originalMessage := message.OriginalMessage
+
+		text := listPlayers(players, ready)
+		originalMessage.Attachments[0].Text = fmt.Sprintf(text)
+		originalMessage.Attachments[0].Actions = []slack.AttachmentAction{
+			{
+				Name:  actionAddPlayer,
+				Text:  "Cancel",
+				Type:  "button",
+				Value: "Cancel",
+			},
+			{
+				Name:  actionNewGame,
+				Text:  "Leave game",
+				Type:  "button",
+				Value: "start",
+				Style: "danger",
+			},
+		}
+		w.Header().Add("Content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(&originalMessage)
 		return
+
 	default:
 		log.Printf("[ERROR] ]Invalid action was submitted: %s", action.Name)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -96,19 +146,40 @@ func (h interactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// responseMessage response to the original slackbutton enabled message.
-// It removes button and replace it with message which indicate how bot will work
-func responseMessage(w http.ResponseWriter, original slack.Message, title, value string) {
-	original.Attachments[0].Actions = []slack.AttachmentAction{} // empty buttons
-	original.Attachments[0].Fields = []slack.AttachmentField{
-		{
-			Title: title,
-			Value: value,
-			Short: false,
-		},
+func listPlayers(players []slack.User, ready []slack.User) string {
+	var output string
+	for _, player := range players {
+		if containsPlayer(ready, player) {
+			output += ":heavy_check_mark: "
+		} else {
+			output += ":x: "
+		}
+		output += "<@" + player.ID + ">\n"
 	}
+	return output
+}
 
-	w.Header().Add("Content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(&original)
+func containsPlayer(players []slack.User, user slack.User) bool {
+	for _, player := range players {
+		if player.Name == user.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func removePlayer(players []slack.User, user slack.User) []slack.User {
+	fmt.Println(len(players))
+	if len(players) == 1 {
+		return []slack.User{}
+	}
+	for index, player := range players {
+		if user == player {
+			if index == len(players) {
+				return players[0 : index-1]
+			}
+			return append(players[:index], players[index+1])
+		}
+	}
+	return players
 }

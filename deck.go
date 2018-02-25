@@ -1,4 +1,4 @@
-package pokerbot
+package main
 
 import "math/rand"
 
